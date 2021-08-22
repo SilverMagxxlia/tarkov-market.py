@@ -1,0 +1,13 @@
+"""
+Tarkov Market API Wrapper
+~~~~~~~~~~~~~~~~
+
+:copyright: (c) 2021-present Hostagen
+:license: MIT, see LICENSE for more details.
+
+"""
+
+__title__ = 'tarkov_market'
+__author__ = 'Hostagen'
+__license__ = 'MIT'
+__version__ = '0.1.0a'
