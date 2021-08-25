@@ -4,7 +4,7 @@
     </a>
 </div>
 
-async API wrapper for Tarkov Market written in Python. [discord.py](https://github.com/Rapptz/discord.py) is reversely designed as a base.
+async API wrapper for Tarkov Market written in Python. reverse-engineered [discord.py](https://github.com/Rapptz/discord.py).
 
 # About
 ## What is Tarkov-Market.py?
