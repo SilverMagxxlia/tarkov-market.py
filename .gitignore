@@ -1,0 +1,5 @@
+*.json
+*.py[cod]
+*.log
+venv
+.venv
