@@ -27,10 +27,13 @@ class Client:
         self.http = HTTPClient(connector, token=token)
 
         self._closed: bool = False
-        self.clear()
+        self._clear()
 
-    def clear(self):
+    def _clear(self):
         self._items: Dict[str, Item] = {}
+
+    def get_item(self, item_name: str):
+        return self._items.get(item_name)
 
     async def fetch_item(self, item_name: str, lang: Optional[str] = None) -> Item:
         """
