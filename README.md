@@ -21,7 +21,7 @@ python3 -m pip install -U tarkov-market.py
 py  -3 -m pip install -U tarkov-market.py
 ```
 
-#Quick Example
+# Quick Example
 
 ```python
 import asyncio
