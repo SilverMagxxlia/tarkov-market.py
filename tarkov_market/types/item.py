@@ -1,15 +1,10 @@
-from typing import Literal, TypedDict
+from typing import Literal
+from .trader import _RawTrader
 
 LangType = Literal['en', 'ru', 'de', 'fr', 'es', 'cn']
 
 
-class Trader(TypedDict, total=False):
-    traderName: str
-    traderPrice: int
-    traderPriceCur: str
-
-
-class Item(Trader):
+class Item(_RawTrader):
     uid: str
     bsgId: str
     name: str
