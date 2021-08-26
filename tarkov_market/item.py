@@ -6,6 +6,8 @@ import datetime
 from .traders import Trader
 
 if TYPE_CHECKING:
+    from .http import HTTPClient
+
     from .types.item import Item as ItemPayload
     from .types.trader import Trader as TraderPayload
 
@@ -31,10 +33,13 @@ class Item:
         'wiki_link',
         'icon_url',
         'image_url',
+        '_http',
         '_trader_payload'
     )
 
-    def __init__(self, payload: ItemPayload):
+    def __init__(self, http: HTTPClient, payload: ItemPayload):
+        self._http = http
+
         self.uid: str = payload['uid']
         self.bsg_id: str = payload['bsgId']
         self.name: str = payload['name']
@@ -78,3 +83,16 @@ class Item:
             'price': data['traderPrice'],
             'currency': data['traderPriceCur']
         }
+
+    async def update(self) -> None:
+        """|coro|
+
+        Update Item data.
+        """
+
+        http = self._http
+
+        async with http:
+            data = await http.get_item_by_uid(self.uid)
+
+        self._update(data)
