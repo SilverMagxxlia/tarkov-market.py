@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 version = ''
-with open('discord/__init__.py') as f:
+with open('tarkov_market/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 readme = ''
