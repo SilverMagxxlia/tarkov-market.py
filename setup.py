@@ -10,7 +10,7 @@ with open('tarkov_market/__init__.py') as f:
 
 readme = ''
 
-with open('README.rst') as f:
+with open('README.md') as f:
     readme = f.read()
 
 packages = [
