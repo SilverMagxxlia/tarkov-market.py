@@ -33,6 +33,20 @@ class Client:
         self._items: Dict[str, Item] = {}
 
     def get_item(self, item_name: str):
+        """
+        Returns a item with the given name.
+
+        Parameters
+        -----------
+        item_name: :class:`str`
+            The name to search for.
+
+        Returns
+        --------
+        Optional[:class:`~tarkov_market.Item`]
+            The item or `None` if item not found.
+        """
+
         return self._items.get(item_name)
 
     async def fetch_item(self, item_name: str, lang: Optional[str] = None) -> Item:
@@ -54,6 +68,14 @@ class Client:
         return Item(data[0])
 
     async def fetch_items(self, item_name: str, lang: Optional[str] = None) -> List[Item]:
+        """|coro|
+        Gets a :class:`.Item`.
+
+        Returns
+        -------
+        :class:`.Item`
+            The items you requested.
+        """
 
         async with self.http as http:
             data = http.get_item_by_name(item_name, lang=lang)
@@ -69,6 +91,10 @@ class Client:
         await self.http.close()
 
     async def setup(self) -> None:
+        """|coro|
+
+        Setup HTTPClient.
+        """
 
         async with self.http as session:
             await session.recreate()
