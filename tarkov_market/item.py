@@ -3,8 +3,11 @@ from typing import TYPE_CHECKING
 
 import datetime
 
+from .traders import Trader
+
 if TYPE_CHECKING:
     from .types.item import Item as ItemPayload
+    from .types.trader import Trader as TraderPayload
 
 __all__ = ('Item',)
 
@@ -21,13 +24,14 @@ class Item:
         'slots',
         'avg24h_price',
         'avg7days_price',
-        '_traders',
         '_updated_at',
         'diff24h',
         'diff7days',
         'link',
         'wiki_link',
-        '_image',
+        'icon_url',
+        'image_url',
+        '_trader_payload'
     )
 
     def __init__(self, payload: ItemPayload):
@@ -42,16 +46,8 @@ class Item:
         self._update(payload)
 
     @property
-    def image(self):
-        return self._image
-
-    @property
-    def trader(self):
-        return self._traders
-
-    @property
-    def icon_url(self):
-        return self.image.icon_url
+    def trader(self) -> Trader:
+        return Trader(self._trader_payload)
 
     @property
     def url(self):
@@ -73,3 +69,12 @@ class Item:
         self._updated_at = data['updated']
         self.diff24h = data['diff24h']
         self.diff7days = data['diff7days']
+
+        self.icon_url = data['icon']
+        self.image_url = data['imgBig']
+
+        self._trader_payload: TraderPayload = {
+            'name': data['traderName'],
+            'price': data['traderPrice'],
+            'currency': data['traderPriceCur']
+        }
