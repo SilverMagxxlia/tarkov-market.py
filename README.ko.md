@@ -4,7 +4,7 @@
     </a>
 </div>
 
-Python으로 이루어진 Tarkov Market API를 위한 비동기 래퍼입니다. 이 API는 [discord.py](https://github.com/Rapptz/discord.py)를 기반으로 하여 역설계 되었습니다..
+Python으로 이루어진 Tarkov Market API를 위한 비동기 래퍼입니다. 이 API는 [discord.py](https://github.com/Rapptz/discord.py)를 기반으로 하여 역설계 되었습니다.
 
 # 정보
 ## Tarkov-Market.py는 무엇입니까?
