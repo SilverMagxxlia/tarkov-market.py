@@ -10,9 +10,10 @@ Tarkov Market API Wrapper
 __title__ = 'tarkov_market'
 __author__ = 'Hostagen'
 __license__ = 'MIT'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 from .client import *
 from .errors import *
 from .item import *
+from .traders import *
 from . import utils
