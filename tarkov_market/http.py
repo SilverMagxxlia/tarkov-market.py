@@ -20,6 +20,7 @@ from urllib.parse import quote as _uriquote
 
 from . import utils
 from .utils import MISSING
+from .errors import LoginFailure
 
 if TYPE_CHECKING:
     from .types.item import LangType
@@ -90,8 +91,10 @@ class HTTPClient:
         self,
         connector: Optional[aiohttp.BaseConnector] = None,
         *,
-        token: str
+        token: str,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
     ):
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
         self.connector = connector
         self._locks: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
         self.token: str = token
@@ -127,8 +130,21 @@ class HTTPClient:
             for tries in range(5):
 
                 try:
+
                     async with self.__session.request(method, url, **kwargs) as response:
                         data = await json_or_text(response)
+
+                        if 'error' in data:
+                            reason = data['error']
+
+                            if reason == 'Access denied':
+                                raise LoginFailure(f'{self.token} is Invalid API KEY.')
+
+                            if reason == 'You reach your limit of 300 reqs per minute':
+                                maybe_lock.defer()
+                                self.loop.call_later(60, lock.release)
+
+                            raise
 
                         return data
 

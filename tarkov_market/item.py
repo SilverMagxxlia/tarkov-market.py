@@ -15,7 +15,10 @@ if TYPE_CHECKING:
     )
     from .types.trader import Trader as TraderPayload
 
-__all__ = ('Item',)
+__all__ = (
+    'Item',
+    'BSGItem'
+)
 
 
 class Item:
