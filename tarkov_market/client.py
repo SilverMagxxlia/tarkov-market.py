@@ -1,10 +1,11 @@
 import aiohttp
 import asyncio
 
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Callable
 
 from .item import Item
 from .http import HTTPClient
+from .utils import MISSING
 
 __all__ = (
     'Client',
@@ -49,6 +50,33 @@ class Client:
 
         return self._items.get(item_name)
 
+    def find_items(
+            self,
+            item_name: Optional[str] = None,
+            *,
+            check: Callable[[Item], bool] = MISSING
+    ) -> List[Item]:
+
+        result = []
+
+        if check is MISSING:
+
+            def check(i: Item):
+
+                if item_name.lower() in i.name.lower():
+                    return True
+
+                return False
+
+        for item in self.items:
+
+            if not check(item):
+                continue
+
+            result.append(item)
+
+        return result
+
     async def fetch_item(self, item_name: str, lang: Optional[str] = None) -> Item:
         """
         Raises
@@ -65,7 +93,7 @@ class Client:
         async with self.http as http:
             data = await http.get_item_by_name(item_name, lang=lang)
 
-        return Item(data[0])
+        return Item(http=self.http, payload=data[0])
 
     async def fetch_items(self, item_name: str, lang: Optional[str] = None) -> List[Item]:
         """|coro|
@@ -80,7 +108,7 @@ class Client:
         async with self.http as http:
             data = http.get_item_by_name(item_name, lang=lang)
 
-        return [Item(d) for d in data]
+        return [Item(http=self.http, payload=d) for d in data]
 
     async def close(self) -> None:
 
@@ -102,8 +130,12 @@ class Client:
             data = await session.get_all_items()
 
             for payload in data:
-                item = Item(payload)
+                item = Item(http=self.http, payload=payload)
                 self._items[item.name] = item
+
+    @property
+    def items(self) -> List[Item]:
+        return list(self._items.values())
 
     async def __aenter__(self):
         return self.http.__aenter__()
