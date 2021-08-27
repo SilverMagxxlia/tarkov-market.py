@@ -185,3 +185,7 @@ class HTTPClient:
     def get_all_items(self):
         r = Route('GET', '/items/all')
         return self.request(r)
+
+    def get_all_bsg_items(self):
+        r = Route('GET', '/bsg/items/all')
+        return self.request(r)
