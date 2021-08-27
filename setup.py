@@ -23,6 +23,7 @@ setup(
     url='https://github.com/Hostagen/tarkov-market.py',
     description='async API wrapper for Tarkov Market written in Python.',
     long_description=readme,
+    long_description_content_type="text/markdown",
     version=version,
     packages=packages,
     author='Hostagen',
