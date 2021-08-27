@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import aiohttp
 import asyncio
 
-from typing import Any, Dict, Optional, List, Callable
+from typing import Any, Dict, Optional, List, Callable, TYPE_CHECKING
 
-from .item import Item
+from .item import Item, BSGItem
 from .http import HTTPClient
 from .utils import MISSING
+
+if TYPE_CHECKING:
+    from .types.item import BSGItem as BSGItemPayload
 
 __all__ = (
     'Client',
@@ -25,13 +30,18 @@ class Client:
         self.token: str = token
 
         connector: Optional[aiohttp.BaseConnector] = options.pop('connector', None)
-        self.http = HTTPClient(connector, token=token)
+        self.http = HTTPClient(connector, token=token, loop=loop)
 
         self._closed: bool = False
         self._clear()
 
     def _clear(self):
         self._items: Dict[str, Item] = {}
+        self._bsg_items: Dict[str, BSGItem] = {}
+
+    def _add_bsg_item(self, payload: BSGItemPayload):
+        item_id = payload['_id']
+        self._bsg_items[item_id] = BSGItem(payload)
 
     def get_item(self, item_name: str):
         """
@@ -76,6 +86,9 @@ class Client:
             result.append(item)
 
         return result
+
+    def get_bsg_item(self, item_id: str) -> BSGItem:
+        return self._bsg_items.get(item_id)
 
     async def fetch_item(self, item_name: str, lang: Optional[str] = None) -> Item:
         """
@@ -132,6 +145,10 @@ class Client:
             for payload in data:
                 item = Item(http=self.http, payload=payload)
                 self._items[item.name] = item
+
+            bsg_item = await session.get_all_bsg_items()
+
+            map(self._add_bsg_item, bsg_item.values())
 
     @property
     def items(self) -> List[Item]:
