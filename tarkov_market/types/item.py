@@ -118,6 +118,7 @@ class BSGProps(TypedDict, total=False):
     IsAlwaysAvailableForInsurance: bool
 
     StackSlots: StackSlots
+    IsAnimated: bool
 
     # Ammo Data
     ammoType: ammoType
@@ -161,6 +162,9 @@ class BSGProps(TypedDict, total=False):
     Blindness: Point3D
     Contusion: Point3D
     ArmorDistanceDistanceDamage: Point3D
+
+    # Weapon Data
+    Foldable: bool
 
 
 class BSGItem(_BaseItem, total=False):
