@@ -4,4 +4,5 @@
 *.egg-info
 venv
 .venv
+docs/_build
 *.buildinfo
