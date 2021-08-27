@@ -22,7 +22,7 @@ async API wrapper for Tarkov Market written in Python. It is designed to reverse
 python3 -m pip install -U tarkov-market.py
 
 # Windows
-py  -3 -m pip install -U tarkov-market.py
+py -3 -m pip install -U tarkov-market.py
 ```
 
 # Quick Example

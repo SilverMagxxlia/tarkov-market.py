@@ -22,7 +22,7 @@ Python으로 이루어진 Tarkov Market API를 위한 비동기 래퍼입니다.
 python3 -m pip install -U tarkov-market.py
 
 # Windows
-py  -3 -m pip install -U tarkov-market.py
+py -3 -m pip install -U tarkov-market.py
 ```
 
 # 빠른 예제
