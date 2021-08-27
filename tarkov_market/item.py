@@ -57,6 +57,32 @@ class Item:
 
         self._update(payload)
 
+    def __str__(self) -> str:
+        return self.name
+
+    def __int__(self) -> int:
+        return self.price
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, Item) and self.uid == other.uid
+
+    def __ne__(self, other) -> bool:
+        return not self.__eq__(other)
+
+    def __repr__(self) -> str:
+        attrs = (
+            ('uid', self.uid),
+            ('name', self.name),
+            ('price', self.price),
+            ('short_name', self.short_name)
+        )
+
+        joined = ' '.join('%s=%r' % t for t in attrs)
+        return f'<{self.__class__.__name__} {joined}>'
+
+    def __hash__(self) -> int:
+        return hash(self.uid)
+
     @property
     def trader(self) -> Trader:
         return Trader(self._trader_payload)
