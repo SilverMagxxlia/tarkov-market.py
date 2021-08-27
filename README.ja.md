@@ -35,7 +35,7 @@ market = tarkov_market.Client(token='API KEY')
 
 
 async def main():
-    # Must run setup once before use.
+    # 使用前に必ず一度呼び出さなければなりません
     await market.setup()
 
     item: tarkov_market.Item = await market.fetch_item('TerraGroup Labs keycard (Red)')
