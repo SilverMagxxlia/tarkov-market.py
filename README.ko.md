@@ -4,6 +4,10 @@
     </a>
 </div>
 
+<p align="center">
+    <a href="#정보">정보</a> |
+    <a href="https://pypi.org/project/tarkov-market.py/">PyPI</a>
+
 Python으로 이루어진 Tarkov Market API를 위한 비동기 래퍼입니다. 이 API는 [discord.py](https://github.com/Rapptz/discord.py)를 기반으로 하여 역설계 되었습니다.
 
 # 정보

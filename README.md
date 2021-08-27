@@ -4,6 +4,10 @@
     </a>
 </div>
 
+<p align="center">
+    <a href="#About">About</a> |
+    <a href="https://pypi.org/project/tarkov-market.py/">PyPI</a>
+
 async API wrapper for Tarkov Market written in Python. It is designed to reverse [discord.py](https://github.com/Rapptz/discord.py) as a base.
 
 # About
