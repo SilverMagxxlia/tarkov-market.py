@@ -1,0 +1,15 @@
+name: Bug report
+description: Create a report to help us improve
+labels: bug
+
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thanks for your bug report.
+  - type: input
+    attributes:
+      label: Summary
+      description: A simple summary of your bug report
+    validations:
+      required: true
