@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Literal, TYPE_CHECKING
 
 import datetime
 
@@ -8,7 +8,11 @@ from .traders import Trader
 if TYPE_CHECKING:
     from .http import HTTPClient
 
-    from .types.item import Item as ItemPayload
+    from .types.item import (
+        Item as ItemPayload,
+        BSGItem as BSGItemPayload,
+        BSGPrefab as PrefabPayload
+    )
     from .types.trader import Trader as TraderPayload
 
 __all__ = ('Item',)
@@ -96,3 +100,71 @@ class Item:
             data = await http.get_item_by_uid(self.uid)
 
         self._update(data)
+
+
+class Prefab:
+
+    def __init__(self, prefab_type: int, payload: PrefabPayload):
+        self._type: int = prefab_type
+        self._update(payload)
+
+    def _update(self, data: PrefabPayload):
+        self.path = data['path']
+        self.rcid = data['rcid']
+
+    @property
+    def type(self):
+
+        types = {
+            0: 'basic',
+            1: 'user'
+        }
+
+        return types.get(self._type, 'Unknown Type')
+
+
+class BSGItem:
+
+    def __init__(self, payload: BSGItemPayload):
+        self.raw_name: str = payload['_name']
+        self.id: str = payload['_id']
+        self.parent: str = payload['_parent']
+        self.type: str = payload['_type']
+
+        self.proto: str = payload.get('_proto', '')
+
+        self._update(payload)
+
+    def _update(self, data: BSGItemPayload) -> None:
+        _props = data['_props']
+
+        self._props = _props
+
+        self.name = _props['Name']
+        self.short_name = _props['ShortName']
+        self.description = _props['Description']
+
+        self.weight: int = _props['Weight']
+        self.width: int = _props['Width']
+        self.height: int = _props['Height']
+
+        self.stack_max: int = _props['StackMaxSize']
+        # self.rarity = _props['Rarity']
+
+        self.spawn_chance: int = _props['SpawnChance']
+        self.item_sound = _props['ItemSound']
+
+        self.prefab = Prefab(0, _props['Prefab'])
+        self.user_prefab = Prefab(1, _props['UsePrefab'])
+
+        self.examine_time: int = _props['ExamineTime']
+
+        self.loot_experience: int = _props['LootExperience']
+
+        self.is_quest_item: bool = _props['QuestItem']
+
+        self.fold_able: bool = _props['IsAnimated']
+
+    @property
+    def loot_exp(self) -> int:
+        return self.loot_experience
