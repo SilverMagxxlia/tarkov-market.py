@@ -73,7 +73,7 @@ class Client:
 
             def check(i: Item):
 
-                if item_name.lower() in i.name.lower():
+                if item_name.lower() in i.name.lower() or item_name.lower() in i.short_name.lower():
                     return True
 
                 return False
