@@ -1,11 +1,10 @@
 .. image:: https://user-images.githubusercontent.com/68284806/130361774-5fe5866f-d61b-40a3-afc1-2978ad530f17.png
+    :align: center
     :height: 128
     :target: https://github.com/Hostagen/tarkov-market.py
     :alt: PyPI
 
 async API wrapper for Tarkov Market written in Python. It is designed to reverse `discord.py <https://github.com/Rapptz/discord.py>`_ as a base.
-
-.. class:: center
 
 `About <About>`_ | PyPI
 
