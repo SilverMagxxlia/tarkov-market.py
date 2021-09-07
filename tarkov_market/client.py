@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import io
 import aiohttp
 import asyncio
 
-from typing import Any, Dict, Optional, List, Callable, TYPE_CHECKING
+from os import PathLike
+from typing import Any, Dict, Optional, List, Callable, Union, TYPE_CHECKING
 
 from .item import Item, BSGItem
 from .http import HTTPClient
@@ -122,6 +124,26 @@ class Client:
             data = http.get_item_by_name(item_name, lang=lang)
 
         return [Item(http=self.http, payload=d) for d in data]
+
+    async def save_items(
+            self,
+            fp: Union[io.BufferedIOBase, PathLike],
+            *,
+            seek_begin: bool = True
+    ) -> int:
+
+        data = await self.http.save_json()
+
+        if isinstance(fp, io.BufferedIOBase):
+            written = fp.write(data)
+
+            if seek_begin is True:
+                fp.seek(0)
+
+            return written
+
+        with open(fp, 'wb') as f:
+            return f.write(data)
 
     async def close(self) -> None:
 
