@@ -10,6 +10,9 @@ class Trader:
     def __init__(self, payload: TraderPayload):
         self._update(payload)
 
+    def __str__(self) -> str:
+        return self.name
+
     def _update(self, data: TraderPayload):
         name: str = data['name']
 
