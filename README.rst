@@ -6,7 +6,7 @@
 
 async API wrapper for Tarkov Market written in Python. It is designed to reverse `discord.py <https://github.com/Rapptz/discord.py>`_ as a base.
 
-`About <About>`_ | PyPI
+`About <About>`_ | `PyPI <https://pypi.org/project/tarkov-market.py/>`_
 
 About
 -----
