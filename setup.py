@@ -10,7 +10,7 @@ with open('tarkov_market/__init__.py') as f:
 
 readme = ''
 
-with open('README.md') as f:
+with open('README.rst') as f:
     readme = f.read()
 
 packages = [
@@ -23,7 +23,7 @@ setup(
     url='https://github.com/Hostagen/tarkov-market.py',
     description='async API wrapper for Tarkov Market written in Python.',
     long_description=readme,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
     version=version,
     packages=packages,
     author='Hostagen',
