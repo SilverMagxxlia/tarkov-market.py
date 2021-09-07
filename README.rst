@@ -8,7 +8,7 @@ async API wrapper for Tarkov Market written in Python. It is designed to reverse
 
 .. class:: center
 
-`PyPI <https://pypi.org/project/tarkov-market.py/>`_
+    `PyPI <https://pypi.org/project/tarkov-market.py/>`_
 
 What is Tarkov-Market.py?
 ---------------------
