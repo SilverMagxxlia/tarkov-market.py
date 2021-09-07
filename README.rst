@@ -11,7 +11,7 @@ async API wrapper for Tarkov Market written in Python. It is designed to reverse
     `PyPI <https://pypi.org/project/tarkov-market.py/>`_
 
 What is Tarkov-Market.py?
----------------------
+-----------------------
 
 - Tarkov-Market.py is Modern Python API using `async` and `await`.
 
