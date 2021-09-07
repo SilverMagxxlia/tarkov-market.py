@@ -34,18 +34,26 @@ class Client:
         connector: Optional[aiohttp.BaseConnector] = options.pop('connector', None)
         self.http = HTTPClient(connector, token=token, loop=loop)
 
+        self._ready: asyncio.Event = asyncio.Event()
         self._closed: bool = False
         self._clear()
 
-    def _clear(self):
+    def _clear(self) -> None:
         self._items: Dict[str, Item] = {}
         self._bsg_items: Dict[str, BSGItem] = {}
+        self._ready.clear()
+
+    def _handle_ready(self) -> None:
+        self._ready.set()
 
     def _add_bsg_item(self, payload: BSGItemPayload):
         item_id = payload['_id']
         self._bsg_items[item_id] = BSGItem(payload)
 
-    def get_item(self, item_name: str):
+    def is_ready(self) -> bool:
+        return self._ready.is_set()
+
+    def get_item(self, item_name: str) -> Item:
         """
         Returns a item with the given name.
 
@@ -152,6 +160,10 @@ class Client:
 
         self._closed = True
         await self.http.close()
+        self._ready.clear()
+
+    async def wait_until_ready(self) -> None:
+        await self._ready.wait()
 
     async def setup(self) -> None:
         """|coro|
@@ -159,18 +171,23 @@ class Client:
         Setup HTTPClient.
         """
 
-        async with self.http as session:
-            await session.recreate()
+        async def runner():
 
-            data = await session.get_all_items()
+            async with self.http as session:
+                await session.recreate()
 
-            for payload in data:
-                item = Item(http=self.http, payload=payload)
-                self._items[item.name] = item
+                data = await session.get_all_items()
 
-            bsg_item = await session.get_all_bsg_items()
+                for payload in data:
+                    item = Item(http=self.http, payload=payload)
+                    self._items[item.name] = item
 
-            map(self._add_bsg_item, bsg_item.values())
+                bsg_item = await session.get_all_bsg_items()
+
+                map(self._add_bsg_item, bsg_item.values())
+
+        future = asyncio.ensure_future(runner(), loop=self.loop)
+        await future
 
     @property
     def items(self) -> List[Item]:
