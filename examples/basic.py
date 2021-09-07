@@ -10,7 +10,7 @@ async def main():
     # Must run setup once before use.
     await market.setup()
 
-    # Find Item and return Items from pre-loaded Item List.
+    # Find Item and return Items from pre-loaded Item List. It's Unlimited.
     item: List[tarkov_market.Item] = market.find_items('TerraGroup Labs keycard (Red)')
 
     return item
