@@ -8,9 +8,11 @@ import weakref
 from typing import (
     Any,
     ClassVar,
+    Coroutine,
     Optional,
     Union,
     Dict,
+    List,
     Type,
     TypeVar,
     TYPE_CHECKING,
@@ -23,10 +25,14 @@ from .utils import MISSING
 from .errors import LoginFailure
 
 if TYPE_CHECKING:
+    from .types import item
+
     from .types.item import LangType
 
+    T = TypeVar('T')
     BE = TypeVar('BE', bound=BaseException)
     MU = TypeVar('MU', bound='MaybeUnlock')
+    Response = Coroutine[Any, Any, T]
 
 
 async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any], str]:
@@ -140,7 +146,10 @@ class HTTPClient:
                             if reason == 'Access denied':
                                 raise LoginFailure(f'{self.token} is Invalid API KEY.')
 
-                            if reason == 'You reach your limit of 300 reqs per minute':
+                            if reason in (
+                                'You reach your limit of 300 reqs per minute',
+                                'You reach your limit of 5 req per minute'
+                            ):
                                 maybe_lock.defer()
                                 self.loop.call_later(60, lock.release)
 
@@ -180,7 +189,7 @@ class HTTPClient:
         name: str,
         *,
         lang: Optional[LangType] = None
-    ):
+    ) -> Response[List[item.Item]]:
 
         if lang:
             payload: Dict[str, str] = {
@@ -194,14 +203,18 @@ class HTTPClient:
 
         return self.request(r)
 
-    def get_item_by_uid(self, uid):
+    def get_item_by_uid(self, uid) -> Response[List[item.Item]]:
         r = Route('GET', '/item?uid={uid}', uid=uid)
         return self.request(r)
 
-    def get_all_items(self):
+    def get_all_items(self) -> Response[List[item.Item]]:
         r = Route('GET', '/items/all')
         return self.request(r)
 
-    def get_all_bsg_items(self):
+    def get_all_bsg_items(self) -> Response[List[item.BSGItem]]:
         r = Route('GET', '/bsg/items/all')
+        return self.request(r)
+
+    def save_json(self):
+        r = Route('GET', '/bsg/items/all/download')
         return self.request(r)
