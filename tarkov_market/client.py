@@ -201,6 +201,20 @@ class Client:
         future = asyncio.ensure_future(runner(), loop=self.loop)
         await future
 
+    async def sync(self) -> None:
+        self._clear()
+
+        async with self.http as session:
+            data = await session.get_all_items()
+
+            for payload in data:
+                item = Item(http=self.http, payload=payload)
+                self._items[item.name] = item
+
+            bsg_item = await session.get_all_bsg_items()
+
+            map(self._add_bsg_item, bsg_item.values())
+
     @property
     def items(self) -> List[Item]:
         return list(self._items.values())
