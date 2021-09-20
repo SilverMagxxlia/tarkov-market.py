@@ -70,6 +70,18 @@ class Client:
 
         return self._items.get(item_name)
 
+    def get_item_from_bsg_id(self, bsg_id: str) -> Optional[Item]:
+
+        def check(item: Item):
+            return bsg_id == item.bsg_id
+
+        result = self.find_items(check=check)
+
+        if not result:
+            return None
+
+        return result[0]
+
     def find_items(
             self,
             item_name: Optional[str] = None,
