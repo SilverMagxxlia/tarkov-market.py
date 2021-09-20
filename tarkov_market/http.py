@@ -153,7 +153,8 @@ class HTTPClient:
                                 maybe_lock.defer()
                                 self.loop.call_later(60, lock.release)
 
-                            raise
+                            else:
+                                raise
 
                         return data
 
