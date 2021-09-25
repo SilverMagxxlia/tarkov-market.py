@@ -5,6 +5,7 @@ import aiohttp
 import asyncio
 
 from os import PathLike
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from typing import Any, Dict, Optional, List, Callable, Union, TYPE_CHECKING
 
 from .item import Item, BSGItem
@@ -26,6 +27,7 @@ class Client:
         *,
         token: str,
         loop: Optional[asyncio.AbstractEventLoop] = None,
+        refresh_rate: Optional[float] = 60.0,
         **options: Any
     ):
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
@@ -33,6 +35,11 @@ class Client:
 
         connector: Optional[aiohttp.BaseConnector] = options.pop('connector', None)
         self.http = HTTPClient(connector, token=token, loop=loop)
+
+        if refresh_rate:
+            sched = AsyncIOScheduler()
+            sched.add_job(self.sync, 'cron', minute=refresh_rate)
+            sched.start()
 
         self._ready: asyncio.Event = asyncio.Event()
         self._closed: bool = False
