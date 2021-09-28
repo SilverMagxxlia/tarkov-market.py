@@ -27,7 +27,7 @@ class Client:
         *,
         token: str,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        refresh_rate: Optional[float] = 60.0,
+        refresh_rate: Optional[float] = 59.0,
         **options: Any
     ):
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
@@ -47,6 +47,7 @@ class Client:
 
     def _clear(self) -> None:
         self._items: Dict[str, Item] = {}
+        self._uid_items: Dict[str, str] = {}
         self._bsg_items: Dict[str, BSGItem] = {}
         self._ready.clear()
 
@@ -77,17 +78,14 @@ class Client:
 
         return self._items.get(item_name)
 
-    def get_item_from_bsg_id(self, bsg_id: str) -> Optional[Item]:
+    def get_item_from_uid(self, uid: str) -> Optional[Item]:
 
-        def check(item: Item):
-            return bsg_id == item.bsg_id
+        item_name = self._uid_items.get(uid)
 
-        result = self.find_items(check=check)
-
-        if not result:
+        if item_name is None:
             return None
 
-        return result[0]
+        return self._items[item_name]
 
     def find_items(
             self,
@@ -200,6 +198,7 @@ class Client:
                 for payload in data:
                     item = Item(http=self.http, payload=payload)
                     self._items[item.name] = item
+                    self._uid_items[item.uid] = item.name
 
                 bsg_item = await session.get_all_bsg_items()
 
