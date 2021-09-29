@@ -40,6 +40,8 @@ class Item:
         'wiki_link',
         'icon_url',
         'image_url',
+        'is_functional',
+        'tags',
         '_http',
         '_trader_payload'
     )
@@ -110,6 +112,9 @@ class Item:
 
         self.icon_url = data['icon']
         self.image_url = data['imgBig']
+
+        self.is_functional: bool = data['isFunctional']
+        self.tags = data['tags']
 
         self._trader_payload: TraderPayload = {
             'name': data['traderName'],

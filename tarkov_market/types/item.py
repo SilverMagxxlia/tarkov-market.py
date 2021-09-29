@@ -23,6 +23,8 @@ class Item(_RawTrader):
     img: str
     imgBig: str
     reference: str
+    isFunctional: bool
+    tags: List[str]
 
 
 class Point3D(TypedDict, total=False):
