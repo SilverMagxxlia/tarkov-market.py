@@ -202,7 +202,8 @@ class Client:
 
                 bsg_item = await session.get_all_bsg_items()
 
-                map(self._add_bsg_item, bsg_item.values())
+                if bsg_item:
+                    map(self._add_bsg_item, bsg_item.values())
 
         future = asyncio.ensure_future(runner(), loop=self.loop)
         await future
