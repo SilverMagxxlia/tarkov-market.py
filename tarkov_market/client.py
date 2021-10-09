@@ -99,11 +99,7 @@ class Client:
         if check is MISSING:
 
             def check(i: Item):
-
-                if item_name.lower() in i.name.lower() or item_name.lower() in i.short_name.lower():
-                    return True
-
-                return False
+                return item_name.lower() in i.name.lower() or item_name.lower() in i.short_name.lower()
 
         for item in self.items:
 
@@ -197,6 +193,10 @@ class Client:
 
                 for payload in data:
                     item = Item(http=self.http, payload=payload)
+
+                    if item.name in self._items:
+                        continue
+
                     self._items[item.name] = item
                     self._uid_items[item.uid] = item.name
 
