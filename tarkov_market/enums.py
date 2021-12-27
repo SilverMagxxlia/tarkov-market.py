@@ -6,3 +6,16 @@ class Rarity(StrEnum):
     common: str = 'Common'
     superrare: str = 'Superrare'
     not_exist: str = 'Not_exist'
+
+
+class LangType(StrEnum):
+    ENGLISH: str = 'en'
+    RUSSIAN: str = 'ru'
+    DEUTSCH: str = 'de'
+    FRENCH: str = 'fr'
+    SPANISH: str = 'es'
+    ESPANOL: str = SPANISH
+    CHINESE: str = 'cn'
+    CZECH: str = 'cz'
+    HUNGARIAN: str = 'hu'
+    TURKISH: str = 'tu'
