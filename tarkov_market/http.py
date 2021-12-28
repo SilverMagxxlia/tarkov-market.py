@@ -21,13 +21,11 @@ from typing import (
 from urllib.parse import quote as _uriquote
 
 from . import utils
-from .utils import MISSING
 from .errors import LoginFailure
 
 if TYPE_CHECKING:
-    from .types import item
-
-    from .types.item import LangType
+    from .types.item import Item as ItemPayload, BSGItem as BSGItemPayload
+    from .enums import LangType
 
     T = TypeVar('T')
     BE = TypeVar('BE', bound=BaseException)
@@ -95,16 +93,13 @@ class HTTPClient:
 
     def __init__(
         self,
-        connector: Optional[aiohttp.BaseConnector] = None,
         *,
         token: str,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-    ):
+    ) -> None:
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
-        self.connector = connector
         self._locks: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
         self.token: str = token
-        self.__session: aiohttp.ClientSession = MISSING
 
     async def request(self, route: Route, **kwargs: Any) -> Any:
         bucket = route.bucket
@@ -137,7 +132,7 @@ class HTTPClient:
 
                 try:
 
-                    async with self.__session.request(method, url, **kwargs) as response:
+                    async with aiohttp.ClientSession() as session, session.request(method, url, **kwargs) as response:
                         data = await json_or_text(response)
 
                         if 'error' in data:
@@ -153,10 +148,12 @@ class HTTPClient:
                                 maybe_lock.defer()
                                 self.loop.call_later(60, lock.release)
 
-                            else:
-                                raise
+                        if 300 > response.status >= 200:
+                            return data
 
-                        return data
+                        if response.status in {500, 502, 504}:
+                            await asyncio.sleep(1 + tries * 2)
+                            continue
 
                 except OSError as e:
 
@@ -166,31 +163,12 @@ class HTTPClient:
 
                     raise
 
-    async def recreate(self):
-        self.__session = aiohttp.ClientSession()
-
-    async def close(self):
-
-        if not self.__session.closed:
-            await self.__session.close()
-
-    async def __aenter__(self):
-
-        if self.__session is not MISSING and self.__session.closed:
-            await self.recreate()
-
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.close()
-        return
-
     def get_item_by_name(
         self,
         name: str,
         *,
-        lang: Optional[LangType] = None
-    ) -> Response[List[item.Item]]:
+        lang: Optional[Union[LangType, str]] = None
+    ) -> Response[List[ItemPayload]]:
 
         if lang:
             payload: Dict[str, str] = {
@@ -204,15 +182,15 @@ class HTTPClient:
 
         return self.request(r)
 
-    def get_item_by_uid(self, uid) -> Response[List[item.Item]]:
+    def get_item_by_uid(self, uid) -> Response[List[ItemPayload]]:
         r = Route('GET', '/item?uid={uid}', uid=uid)
         return self.request(r)
 
-    def get_all_items(self) -> Response[List[item.Item]]:
+    def get_all_items(self) -> Response[List[ItemPayload]]:
         r = Route('GET', '/items/all')
         return self.request(r)
 
-    def get_all_bsg_items(self) -> Response[List[item.BSGItem]]:
+    def get_all_bsg_items(self) -> Response[List[BSGItemPayload]]:
         r = Route('GET', '/bsg/items/all')
         return self.request(r)
 
