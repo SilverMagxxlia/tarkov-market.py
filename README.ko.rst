@@ -4,20 +4,20 @@
     :target: https://github.com/Hostagen/tarkov-market.py
     :alt: PyPI
 
-async API wrapper for Tarkov Market written in Python. It is designed to reverse `discord.py <https://github.com/Rapptz/discord.py>`_ as a base.
+Python으로 이루어진 Tarkov Market API를 위한 비동기 래퍼입니다. 이 API는 `discord.py <https://github.com/Rapptz/discord.py>`_를 기반으로 하여 역설계 되었습니다.
 
 .. class:: center
 
     `PyPI <https://pypi.org/project/tarkov-market.py/>`_
 
-What is Tarkov-Market.py?
+Tarkov-Market.py는 무엇입니까?
 -------------------------
 
-- Tarkov-Market.py is Modern Python API using `async` and `await`.
+- Tarkov-Market.py는 간단한 `async`와 `await`를 사용한 Python API입니다.
 
-Installing
+설치
 ----------
-**Python 3.8 or higher is required**
+**Python 3.8 이상의 버전이 요구됩니다.**
 
 .. code:: sh
 
@@ -27,7 +27,7 @@ Installing
     # Windows
     py -3 -m pip install -U tarkov-market.py
 
-Quick Example
+빠른 예시
 -------------
 
 .. code:: py
@@ -57,7 +57,7 @@ Quick Example
         loop.close()
 
 
-Fetch Example
+Fetch 예시
 ~~~~~~~~~~~~~
 
 .. code:: py
