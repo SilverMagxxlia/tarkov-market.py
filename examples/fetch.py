@@ -3,13 +3,11 @@ import tarkov_market
 
 from typing import List
 
-market = tarkov_market.Client(token='INSERT YOUR API KEY.')
+loop = asyncio.get_event_loop()
+market = tarkov_market.Client(token='INSERT YOUR API KEY.', loop=loop)
 
 
 async def main():
-    # Must run setup once before use.
-    await market.setup()
-
     # fetch the latest data from tarkov-market.
     # there is a limit of 300 requests per minute to fetch.
 
@@ -22,6 +20,5 @@ async def main():
     return item
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.close()
