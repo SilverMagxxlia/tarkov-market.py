@@ -5,7 +5,7 @@ import io
 from os import PathLike
 from asyncio import get_event_loop, Event, AbstractEventLoop
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from typing import Any, Dict, Optional, List, Callable, Union
+from typing import Dict, Optional, List, Callable, Union
 from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
 
 from .item import Item, BSGItem
@@ -87,25 +87,20 @@ class Client:
         raise InvalidArgument('One argument must be entered.')
 
     def find_items(
-            self,
-            item_name: Optional[str] = None,
-            *,
-            check: Callable[[Item], bool] = MISSING
+        self,
+        item_name: Optional[str] = None,
+        *,
+        check: Callable[[Item], bool] = MISSING
     ) -> List[Item]:
-
-        result = []
 
         if check is MISSING:
 
             def check(i: Item):
                 return item_name.lower() in i.name.lower() or item_name.lower() in i.short_name.lower()
 
-        for item in self.items:
-
-            if not check(item):
-                continue
-
-            result.append(item)
+        result = [
+            item for item in self.items if check(item)
+        ]
 
         return result
 
@@ -125,8 +120,7 @@ class Client:
             The Item you requested.
         """
 
-        async with self.http as http:
-            data = await http.get_item_by_name(item_name, lang=lang)
+        data = await self.http.get_item_by_name(item_name, lang=lang)
 
         return Item(http=self.http, payload=data[0])
 
@@ -140,8 +134,7 @@ class Client:
             The items you requested.
         """
 
-        async with self.http as http:
-            data = http.get_item_by_name(item_name, lang=lang)
+        data = await self.http.get_item_by_name(item_name, lang=lang)
 
         return [Item(http=self.http, payload=d) for d in data]
 
