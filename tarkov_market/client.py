@@ -1,19 +1,25 @@
 from __future__ import annotations
 
 import io
-import aiohttp
-import asyncio
 
 from os import PathLike
+from asyncio import get_event_loop, Event, AbstractEventLoop
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from typing import Any, Dict, Optional, List, Callable, Union, TYPE_CHECKING
+from typing import Any, Dict, Optional, List, Callable, Union
+from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
 
 from .item import Item, BSGItem
 from .http import HTTPClient
 from .utils import MISSING
+from .errors import InvalidArgument
 
-if TYPE_CHECKING:
-    from .types.item import BSGItem as BSGItemPayload
+
+basicConfig(level=WARNING)
+log: Logger = getLogger('client')
+stream: StreamHandler = StreamHandler()
+stream.setLevel(level=WARNING)
+# stream.setFormatter()
+log.addHandler(stream)
 
 __all__ = (
     'Client',
@@ -26,66 +32,59 @@ class Client:
         self,
         *,
         token: str,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
+        loop: Optional[AbstractEventLoop] = None,
         refresh_rate: Optional[float] = 59.0,
-        **options: Any
     ):
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+        self.loop: AbstractEventLoop = get_event_loop() if loop is None else loop
+        self.http: HTTPClient = HTTPClient(token=token, loop=loop)
         self.token: str = token
-
-        connector: Optional[aiohttp.BaseConnector] = options.pop('connector', None)
-        self.http = HTTPClient(connector, token=token, loop=loop)
 
         if refresh_rate:
             sched = AsyncIOScheduler()
-            sched.add_job(self.sync, 'cron', minute=refresh_rate)
+            sched.add_job(self.synchronize, 'cron', minute=refresh_rate)
             sched.start()
 
-        self._ready: asyncio.Event = asyncio.Event()
+        self._ready: Event = Event()
         self._closed: bool = False
         self._clear()
 
     def _clear(self) -> None:
         self._items: Dict[str, Item] = {}
-        self._uid_items: Dict[str, str] = {}
         self._bsg_items: Dict[str, BSGItem] = {}
         self._ready.clear()
 
     def _handle_ready(self) -> None:
         self._ready.set()
 
-    def _add_bsg_item(self, payload: BSGItemPayload):
-        item_id = payload['_id']
-        self._bsg_items[item_id] = BSGItem(payload)
-
     def is_ready(self) -> bool:
         return self._ready.is_set()
 
-    def get_item(self, item_name: str) -> Item:
-        """
-        Returns a item with the given name.
+    def get_item(
+        self,
+        name: str = MISSING,
+        *,
+        uid: str = MISSING,
+        bsg_id: str = MISSING,
+    ) -> Optional[Item]:
 
-        Parameters
-        -----------
-        item_name: :class:`str`
-            The name to search for.
+        if name is not MISSING:
+            return self._items.get(name)
 
-        Returns
-        --------
-        Optional[:class:`~tarkov_market.Item`]
-            The item or `None` if item not found.
-        """
+        if uid is not MISSING:
+            data = {
+                item.uid: item
+                for item in self._items.values()
+            }
+            return data.get(uid)
 
-        return self._items.get(item_name)
+        if bsg_id is not MISSING:
+            data = {
+                item.bsg_id: item
+                for item in self._items.values()
+            }
+            return data.get(bsg_id)
 
-    def get_item_from_uid(self, uid: str) -> Optional[Item]:
-
-        item_name = self._uid_items.get(uid)
-
-        if item_name is None:
-            return None
-
-        return self._items[item_name]
+        raise InvalidArgument('One argument must be entered.')
 
     def find_items(
             self,
@@ -166,68 +165,43 @@ class Client:
         with open(fp, 'wb') as f:
             return f.write(data)
 
-    async def close(self) -> None:
-
-        if self._closed:
-            return
-
-        self._closed = True
-        await self.http.close()
-        self._ready.clear()
-
     async def wait_until_ready(self) -> None:
         await self._ready.wait()
 
-    async def setup(self) -> None:
-        """|coro|
+    def start(self) -> None:
+        self.loop.run_until_complete(self.ready())
 
-        Setup HTTPClient.
-        """
+    async def ready(self) -> None:
 
-        async def runner():
+        ready: bool = False
 
-            async with self.http as session:
-                await session.recreate()
+        try:
+            await self.synchronize()
+            ready = True
 
-                data = await session.get_all_items()
+        except Exception as error:
+            log.critical(f'Fail to ready client: {error}')
 
-                for payload in data:
-                    item = Item(http=self.http, payload=payload)
+        finally:
 
-                    if item.name in self._items:
-                        continue
+            if ready is True:
+                log.debug('Client is now ready.')
 
-                    self._items[item.name] = item
-                    self._uid_items[item.uid] = item.name
-
-                bsg_item = await session.get_all_bsg_items()
-
-                if bsg_item:
-                    map(self._add_bsg_item, bsg_item.values())
-
-        future = asyncio.ensure_future(runner(), loop=self.loop)
-        await future
-
-    async def sync(self) -> None:
+    async def synchronize(self) -> None:
         self._clear()
 
-        async with self.http as session:
-            data = await session.get_all_items()
+        data = await self.http.get_all_items()
 
-            for payload in data:
-                item = Item(http=self.http, payload=payload)
-                self._items[item.name] = item
+        for payload in data:
+            item = Item(http=self.http, payload=payload)
+            self._items[item.name] = item
 
-            bsg_item = await session.get_all_bsg_items()
+        data = await self.http.get_all_bsg_items()
 
-            map(self._add_bsg_item, bsg_item.values())
+        for payload in data.values():
+            item = BSGItem(payload=payload)
+            self._bsg_items[item.id] = item
 
     @property
     def items(self) -> List[Item]:
         return list(self._items.values())
-
-    async def __aenter__(self):
-        return self.http.__aenter__()
-
-    async def __aexit__(self, *args):
-        return self.http.__aexit__(*args)
