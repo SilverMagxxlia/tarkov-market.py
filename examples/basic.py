@@ -20,4 +20,4 @@ async def main():
 if __name__ == '__main__':
     market.start()
     loop.run_until_complete(main())
-    loop.run_forever()
+    loop.close()
