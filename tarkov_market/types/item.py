@@ -1,7 +1,5 @@
-from typing import List, Dict, Literal, TypedDict
+from typing import List, Literal, TypedDict
 from .trader import _RawTrader
-
-LangType = Literal['en', 'ru', 'de', 'fr', 'es', 'cn']
 
 
 class Item(_RawTrader):
