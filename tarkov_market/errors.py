@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional, TYPE_CHECKING, Any, Tuple, Union
 
 if TYPE_CHECKING:
-    from aiohttp import ClientResponse, ClientWebSocketResponse
+    from aiohttp import ClientResponse
 
     try:
         from requests import Response
@@ -13,6 +13,10 @@ if TYPE_CHECKING:
 
 
 class TarkovMarketException(Exception):
+    pass
+
+
+class ClientException(TarkovMarketException):
     pass
 
 
@@ -39,4 +43,8 @@ class HTTPException(TarkovMarketException):
 
 
 class LoginFailure(TarkovMarketException):
+    pass
+
+
+class InvalidArgument(ClientException):
     pass
