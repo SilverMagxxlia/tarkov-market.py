@@ -161,15 +161,15 @@ class Client:
     async def wait_until_ready(self) -> None:
         await self._ready.wait()
 
-    def start(self) -> None:
-        self.loop.run_until_complete(self.ready())
+    def start(self, *, load_bsg_items: bool = False) -> None:
+        self.loop.run_until_complete(self.ready(bsg_items=load_bsg_items))
 
-    async def ready(self) -> None:
+    async def ready(self, *, bsg_items: bool = True) -> None:
 
         ready: bool = False
+        await self.synchronize(bsg_items=bsg_items)
 
         try:
-            await self.synchronize()
             ready = True
 
         except Exception as error:
@@ -180,7 +180,7 @@ class Client:
             if ready is True:
                 log.debug('Client is now ready.')
 
-    async def synchronize(self) -> None:
+    async def synchronize(self, *, bsg_items: bool = True) -> None:
         self._clear()
 
         data = await self.http.get_all_items()
@@ -189,11 +189,12 @@ class Client:
             item = Item(http=self.http, payload=payload)
             self._items[item.name] = item
 
-        data = await self.http.get_all_bsg_items()
+        if bsg_items is True:
+            data = await self.http.get_all_bsg_items()
 
-        for payload in data.values():
-            item = BSGItem(payload=payload)
-            self._bsg_items[item.id] = item
+            for payload in data.values():
+                item = BSGItem(payload=payload)
+                self._bsg_items[item.id] = item
 
     @property
     def items(self) -> List[Item]:
