@@ -135,7 +135,7 @@ class HTTPClient:
                     async with aiohttp.ClientSession() as session, session.request(method, url, **kwargs) as response:
                         data = await json_or_text(response)
 
-                        if 'error' in data:
+                        if isinstance(data, dict) and data.get('error') is not None:
                             reason = data['error']
 
                             if reason == 'Access denied':
