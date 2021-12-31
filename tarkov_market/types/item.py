@@ -1,4 +1,4 @@
-from typing import List, Literal, TypedDict
+from typing import Any, List, Literal, TypedDict
 from .trader import _RawTrader
 
 
@@ -52,7 +52,7 @@ class _BaseItem(TypedDict):
     _proto: str
 
 
-class StackSlots(_BaseItem, total=False):
+class StackSlotItem(_BaseItem, total=False):
     _props: Filters
     _max_count: int
 
@@ -64,7 +64,7 @@ ammoType = Literal['bullet', 'grenade', 'buckshot']
 
 class BSGProps(TypedDict, total=False):
 
-    # Basic Data
+    # Parent Item Data
     Name: str
     ShortName: str
     Description: str
@@ -73,9 +73,7 @@ class BSGProps(TypedDict, total=False):
     Width: int
     Height: int
     StackMaxSize: int
-    Rarity: str
-    SpawnChance: int
-    CreditsPrice: int
+    spawnRarity: str
     ItemSound: str
     Prefab: BSGPrefab
     UsePrefab: BSGPrefab
@@ -94,30 +92,39 @@ class BSGProps(TypedDict, total=False):
     LootExperience: int
     ExamineExperience: int
     HideEntrails: bool
+
     RepairCost: int
     RepairSpeed: int
+
     ExtraSizeLeft: int
     ExtraSizeRight: int
     ExtraSizeUp: int
     ExtraSizeDown: int
     ExtraSizeForceAdd: bool
+
     MergesWithChildren: bool
+
     CanSellOnRagfair: bool
     CanRequireOnRagfair: bool
+
     ConflictingItems: list
     FixedPrice: bool
+
     Unlootable: bool
     UnlootableFromSlot: str
     UnlootableFromSide: list
-    ChangePriceCoef: int
-    AllowSpawnOnLocations: list
-    SendToClient: bool
+
     AnimationVariantsNumber: int
     DiscardingBlock: bool
     RagFairCommissionModifier: int
     IsAlwaysAvailableForInsurance: bool
 
-    StackSlots: StackSlots
+    # End of common data
+
+    AllowSpawnOnLocations: list
+    SendToClient: bool
+
+    StackSlots: List[StackSlotItem]
     IsAnimated: bool
 
     # Ammo Data
@@ -165,6 +172,10 @@ class BSGProps(TypedDict, total=False):
 
     # Weapon Data
     Foldable: bool
+
+    CreditsPrice: int
+    SpawnFilter: List[Any]
+    DogTagQualities: bool
 
 
 class BSGItem(_BaseItem, total=False):
