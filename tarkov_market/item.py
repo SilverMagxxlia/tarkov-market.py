@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import datetime
 
@@ -11,7 +11,8 @@ if TYPE_CHECKING:
     from .types.item import (
         Item as ItemPayload,
         BSGItem as BSGItemPayload,
-        BSGPrefab as PrefabPayload
+        BSGPrefab as PrefabPayload,
+        BSGProps
     )
     from .types.trader import Trader as TraderPayload
 
@@ -164,40 +165,42 @@ class BSGItem:
         self.id: str = payload['_id']
         self.parent: str = payload['_parent']
         self.type: str = payload['_type']
-
         self.proto: str = payload.get('_proto', '')
 
-        self._update(payload)
+        self._update(payload['_props'])
 
-    def _update(self, data: BSGItemPayload) -> None:
-        _props = data['_props']
+    def _update(self, data: BSGProps) -> None:
+        self.name = data.get('Name')
+        self.short_name = data.get('ShortName')
+        self.description = data.get('Description')
 
-        self._props = _props
+        self.weight: int = data.get('Weight')
+        self.width: int = data.get('Width')
+        self.height: int = data.get('Height')
 
-        self.name = _props['Name']
-        self.short_name = _props['ShortName']
-        self.description = _props['Description']
+        self.stack_max: int = data.get('StackMaxSize')
+        self.rarity = data.get('spawnRarity')
 
-        self.weight: int = _props['Weight']
-        self.width: int = _props['Width']
-        self.height: int = _props['Height']
+        self.item_sound = data.get('ItemSound')
 
-        self.stack_max: int = _props['StackMaxSize']
-        # self.rarity = _props['Rarity']
+        prefab = data.get('Prefab')
+        use_prefab = data.get('UsePrefab')
 
-        self.spawn_chance: int = _props['SpawnChance']
-        self.item_sound = _props['ItemSound']
+        self.prefab = Prefab(0, prefab) if prefab else None
+        self.use_prefab = Prefab(1, use_prefab) if use_prefab else None
 
-        self.prefab = Prefab(0, _props['Prefab'])
-        self.user_prefab = Prefab(1, _props['UsePrefab'])
+        self.examine_time: int = data.get('ExamineTime')
 
-        self.examine_time: int = _props['ExamineTime']
+        self.loot_experience: int = data.get('LootExperience')
 
-        self.loot_experience: int = _props['LootExperience']
+        self.is_quest_item: bool = data.get('QuestItem')
 
-        self.is_quest_item: bool = _props['QuestItem']
+        self.fold_able: bool = data.get('IsAnimated', False)
 
-        self.fold_able: bool = _props['IsAnimated']
+        self.repair_cost: int = data.get('RepairCost', 0)
+        self.repair_speed: int = data.get('RepairSpeed', 0)
+
+        self.credits_price: int = data.get('CreditsPrice', 0)
 
     @property
     def loot_exp(self) -> int:
