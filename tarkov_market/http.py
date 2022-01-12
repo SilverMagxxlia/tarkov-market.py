@@ -190,6 +190,10 @@ class HTTPClient:
         r = Route('GET', '/items/all')
         return self.request(r)
 
+    def get_all_item_by_tag(self, tag: str) -> Response[List[ItemPayload]]:
+        r = Route('GET', '/items/all?tag={tag}', tag=tag)
+        return self.request(r)
+
     def get_all_bsg_items(self) -> Response[List[BSGItemPayload]]:
         r = Route('GET', '/bsg/items/all')
         return self.request(r)
