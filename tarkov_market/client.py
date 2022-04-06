@@ -3,7 +3,7 @@ from __future__ import annotations
 import io
 
 from os import PathLike
-from asyncio import get_event_loop, Event, AbstractEventLoop
+from asyncio import sleep, get_event_loop, Event, AbstractEventLoop
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from typing import Dict, Optional, List, Callable, Union
 from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
@@ -11,7 +11,7 @@ from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
 from .item import Item, BSGItem
 from .http import HTTPClient
 from .utils import MISSING
-from .errors import InvalidArgument
+from .errors import InvalidArgument, NotFound
 
 
 basicConfig(level=WARNING)
@@ -33,16 +33,15 @@ class Client:
         *,
         token: str,
         loop: Optional[AbstractEventLoop] = None,
-        refresh_rate: Optional[float] = 59.0,
+        refresh_rate: Optional[float] = 60.0,
+        refresh_bsg_items: bool = False,
     ):
         self.loop: AbstractEventLoop = get_event_loop() if loop is None else loop
         self.http: HTTPClient = HTTPClient(token=token, loop=loop)
         self.token: str = token
 
         if refresh_rate:
-            sched = AsyncIOScheduler()
-            sched.add_job(self.synchronize, 'cron', minute=refresh_rate)
-            sched.start()
+            self.loop.create_task(self.__refresh_event(refresh_rate, refresh_bsg_items))
 
         self._ready: Event = Event()
         self._closed: bool = False
@@ -139,10 +138,10 @@ class Client:
         return [Item(http=self.http, payload=d) for d in data]
 
     async def save_items(
-            self,
-            fp: Union[io.BufferedIOBase, PathLike],
-            *,
-            seek_begin: bool = True
+        self,
+        fp: Union[io.BufferedIOBase, PathLike],
+        *,
+        seek_begin: bool = True
     ) -> int:
 
         data = await self.http.save_json()
@@ -196,6 +195,25 @@ class Client:
                 item = BSGItem(payload=payload)
                 self._bsg_items[item.id] = item
 
+    async def fetch_all_items_by_tag(self, tag: str = MISSING, tags: List[str] = MISSING) -> List[Item]:
+
+        if tags is not MISSING:
+            tag = ','.join(tags)
+
+        data = await self.http.get_all_item_by_tag(tag=tag)
+
+        if not data:
+            raise NotFound('Item is not Founded by tag.')
+
+        return [Item(http=self.http, payload=payload) for payload in data]
+
     @property
     def items(self) -> List[Item]:
         return list(self._items.values())
+
+    async def __refresh_event(self, refresh_rate: float, bsg_items: bool) -> None:
+        await self.wait_until_ready()
+
+        while True:
+            await self.synchronize(bsg_items=bsg_items)
+            await sleep(refresh_rate)
