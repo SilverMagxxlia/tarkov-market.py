@@ -48,3 +48,7 @@ class LoginFailure(TarkovMarketException):
 
 class InvalidArgument(ClientException):
     pass
+
+
+class NotFound(ClientException):
+    pass
