@@ -14,8 +14,9 @@ class Trader:
         return self.name
 
     def _update(self, data: TraderPayload):
-        name: str = data['name']
+        name: str = data['traderName']
 
         self.name: Optional[str] = None if name == '' else name
-        self.price: int = data['price']
-        self.currency: currencies = data['currency']
+        self.price: int = data['traderPrice']
+        self.currency: currencies = data['traderPriceCur']
+        self.ruble_price: int = data['traderPriceRub']
