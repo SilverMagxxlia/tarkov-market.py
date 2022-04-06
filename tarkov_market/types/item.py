@@ -1,8 +1,8 @@
 from typing import Any, List, Literal, TypedDict
-from .trader import _RawTrader
+from .trader import Trader
 
 
-class Item(_RawTrader):
+class Item(Trader):
     uid: str
     bsgId: str
     name: str
@@ -13,8 +13,8 @@ class Item(_RawTrader):
     avg7daysPrice: int
     updated: str
     slots: int
-    diff24h: int
-    diff7days: int
+    diff24h: float
+    diff7days: float
     icon: str
     link: str
     wikiLink: str
