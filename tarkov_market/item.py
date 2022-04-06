@@ -14,7 +14,6 @@ if TYPE_CHECKING:
         BSGPrefab as PrefabPayload,
         BSGProps
     )
-    from .types.trader import Trader as TraderPayload
 
 __all__ = (
     'Item',
@@ -43,8 +42,8 @@ class Item:
         'image_url',
         'is_functional',
         'tags',
+        'trader',
         '_http',
-        '_trader_payload'
     )
 
     def __init__(self, http: HTTPClient, payload: ItemPayload):
@@ -87,10 +86,6 @@ class Item:
         return hash(self.uid)
 
     @property
-    def trader(self) -> Trader:
-        return Trader(self._trader_payload)
-
-    @property
     def url(self):
         return self.link
 
@@ -117,11 +112,7 @@ class Item:
         self.is_functional: bool = data['isFunctional']
         self.tags = data['tags']
 
-        self._trader_payload: TraderPayload = {
-            'name': data['traderName'],
-            'price': data['traderPrice'],
-            'currency': data['traderPriceCur']
-        }
+        self.trader: Trader = Trader(data)
 
     async def update(self) -> None:
         """|coro|
