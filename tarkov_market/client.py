@@ -4,7 +4,6 @@ import io
 
 from os import PathLike
 from asyncio import sleep, get_event_loop, Event, AbstractEventLoop
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from typing import Dict, Optional, List, Callable, Union
 from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
 
@@ -212,8 +211,10 @@ class Client:
         return list(self._items.values())
 
     async def __refresh_event(self, refresh_rate: float, bsg_items: bool) -> None:
-        await self.wait_until_ready()
 
-        while True:
-            await self.synchronize(bsg_items=bsg_items)
+        if not refresh_rate > 0:
+            return
+
+        while not self.loop.is_closed():
             await sleep(refresh_rate)
+            await self.synchronize(bsg_items=bsg_items)
