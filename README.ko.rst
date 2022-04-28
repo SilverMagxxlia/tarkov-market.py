@@ -4,7 +4,7 @@
     :target: https://github.com/Hostagen/tarkov-market.py
     :alt: PyPI
 
-Python으로 이루어진 Tarkov Market API를 위한 비동기 래퍼입니다. 이 API는 `discord.py <https://github.com/Rapptz/discord.py>`_를 기반으로 하여 역설계 되었습니다.
+Python으로 이루어진 Tarkov Market API 비동기 라이브러리입니다.
 
 .. class:: center
 
@@ -41,8 +41,8 @@ Tarkov-Market.py는 무엇입니까?
     market = tarkov_market.Client(token='INSERT YOUR API KEY.', refresh_rate=None)
 
 
-    async def main():
-        # Find Item and return Items from pre-loaded Item List. It's Unlimited.
+    async def main() -> None:
+        # Find Item and return Items from preloaded Item List. It's Unlimited.
         items: List[tarkov_market.Item] = market.find_items('keycard')
 
         # Get Item by name. Can get it through uid and bsg_id.
@@ -51,11 +51,14 @@ Tarkov-Market.py는 무엇입니까?
         item = market.get_item(bsg_id='BSG_ID')
         item = market.get_item(uid='UID')
 
+        print('Item Name: {}'.format(item.name))
+        print('Short Name: {}'.format(item.short_name))
+        print('Price {}'.format(item.price))
+
     if __name__ == '__main__':
         market.start()
         loop.run_until_complete(main())
         loop.close()
-
 
 Fetch 예시
 ~~~~~~~~~~~~~
