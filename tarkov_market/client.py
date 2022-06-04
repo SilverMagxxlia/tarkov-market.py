@@ -179,9 +179,9 @@ class Client:
                 log.debug('Client is now ready.')
 
     async def synchronize(self, *, bsg_items: bool = True) -> None:
-        self._clear()
-
         data = await self.http.get_all_items()
+
+        self._clear()
 
         for payload in data:
             item = Item(http=self.http, payload=payload)
