@@ -129,8 +129,16 @@ class HTTPRequester:
         r = Route('GET', '/item?uid={uid}', uid=uid)
         return self.request(r)
 
-    def get_all_items(self) -> Response[List[ItemPayload]]:
-        r = Route('GET', '/items/all')
+    def get_all_items(self, sort: str = None, sort_direction: str = None) -> Response[List[ItemPayload]]:
+        url = '/items/all'
+
+        if sort:
+            url += f'?sort={sort}'
+
+        if sort_direction:
+            url += f'&sort_direction={sort_direction}'
+
+        r = Route('GET', url)
         return self.request(r)
 
     def get_all_item_by_tag(self, tag: str) -> Response[List[ItemPayload]]:
