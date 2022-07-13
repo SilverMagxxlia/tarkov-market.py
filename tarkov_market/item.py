@@ -6,8 +6,6 @@ import datetime
 from .traders import Trader
 
 if TYPE_CHECKING:
-    from .http import HTTPClient
-
     from .types.item import (
         Item as ItemPayload,
         BSGItem as BSGItemPayload,
@@ -48,9 +46,7 @@ class Item:
         'have_market_data',
     )
 
-    def __init__(self, http: HTTPClient, payload: ItemPayload):
-        self._http = http
-
+    def __init__(self, payload: ItemPayload):
         self.uid: str = payload['uid']
         self.bsg_id: str = payload['bsgId']
         self.name: str = payload['name']
@@ -118,20 +114,7 @@ class Item:
         self.trader: Trader = Trader(data)
 
         self.banned_on_flea: bool = data['bannedOnFlea']
-        self.have_market_data: bool = data['haveMarketData']
-
-    async def update(self) -> None:
-        """|coro|
-
-        Update Item data.
-        """
-
-        http = self._http
-
-        async with http:
-            data = await http.get_item_by_uid(self.uid)
-
-        self._update(data)
+        self.have_market_data: bool = data.get('haveMarketData', False)
 
 
 class Prefab:
