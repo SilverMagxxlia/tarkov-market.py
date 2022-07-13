@@ -44,6 +44,8 @@ class Item:
         'tags',
         'trader',
         '_http',
+        'banned_on_flea',
+        'have_market_data',
     )
 
     def __init__(self, http: HTTPClient, payload: ItemPayload):
@@ -76,7 +78,8 @@ class Item:
             ('uid', self.uid),
             ('name', self.name),
             ('price', self.price),
-            ('short_name', self.short_name)
+            ('short_name', self.short_name),
+            ('banned_on_flea', self.banned_on_flea),
         )
 
         joined = ' '.join('%s=%r' % t for t in attrs)
@@ -113,6 +116,9 @@ class Item:
         self.tags = data['tags']
 
         self.trader: Trader = Trader(data)
+
+        self.banned_on_flea: bool = data['bannedOnFlea']
+        self.have_market_data: bool = data['haveMarketData']
 
     async def update(self) -> None:
         """|coro|
