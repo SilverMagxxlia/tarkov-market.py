@@ -8,7 +8,7 @@ from typing import Dict, Optional, List, Callable, Union
 from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
 
 from .item import Item, BSGItem
-from .http import HTTPClient
+from .requester import HTTPRequester
 from .utils import MISSING
 from .errors import InvalidArgument, NotFound
 
@@ -36,7 +36,7 @@ class Client:
         refresh_bsg_items: bool = False,
     ):
         self.loop: AbstractEventLoop = get_event_loop() if loop is None else loop
-        self.http: HTTPClient = HTTPClient(token=token, loop=loop)
+        self.__requester: HTTPRequester = HTTPRequester(token=token, loop=loop)
         self.token: str = token
 
         if refresh_rate:
@@ -118,9 +118,9 @@ class Client:
             The Item you requested.
         """
 
-        data = await self.http.get_item_by_name(item_name, lang=lang)
+        data = await self.__requester.get_item_by_name(item_name, lang=lang)
 
-        return Item(http=self.http, payload=data[0])
+        return Item(payload=data[0])
 
     async def fetch_items(self, item_name: str, lang: Optional[str] = None) -> List[Item]:
         """|coro|
@@ -132,9 +132,9 @@ class Client:
             The items you requested.
         """
 
-        data = await self.http.get_item_by_name(item_name, lang=lang)
+        data = await self.__requester.get_item_by_name(item_name, lang=lang)
 
-        return [Item(http=self.http, payload=d) for d in data]
+        return [Item(payload=d) for d in data]
 
     async def save_items(
         self,
@@ -143,7 +143,7 @@ class Client:
         seek_begin: bool = True
     ) -> int:
 
-        data = await self.http.save_json()
+        data = await self.__requester.save_json()
 
         if isinstance(fp, io.BufferedIOBase):
             written = fp.write(data)
@@ -165,7 +165,7 @@ class Client:
     async def ready(self, *, bsg_items: bool = True) -> None:
 
         ready: bool = False
-        await self.synchronize(bsg_items=bsg_items)
+        await self.load_data(bsg_items=bsg_items)
 
         try:
             ready = True
@@ -178,17 +178,17 @@ class Client:
             if ready is True:
                 log.debug('Client is now ready.')
 
-    async def synchronize(self, *, bsg_items: bool = True) -> None:
-        data = await self.http.get_all_items()
+    async def load_data(self, *, bsg_items: bool = True) -> None:
+        data = await self.__requester.get_all_items()
 
         self._clear()
 
         for payload in data:
-            item = Item(http=self.http, payload=payload)
+            item = Item(payload=payload)
             self._items[item.name] = item
 
         if bsg_items is True:
-            data = await self.http.get_all_bsg_items()
+            data = await self.__requester.get_all_bsg_items()
 
             for payload in data.values():
                 item = BSGItem(payload=payload)
@@ -199,12 +199,12 @@ class Client:
         if tags is not MISSING:
             tag = ','.join(tags)
 
-        data = await self.http.get_all_item_by_tag(tag=tag)
+        data = await self.__requester.get_all_item_by_tag(tag=tag)
 
         if not data:
             raise NotFound('Item is not Founded by tag.')
 
-        return [Item(http=self.http, payload=payload) for payload in data]
+        return [Item(payload=payload) for payload in data]
 
     @property
     def items(self) -> List[Item]:
@@ -217,4 +217,4 @@ class Client:
 
         while not self.loop.is_closed():
             await sleep(refresh_rate)
-            await self.synchronize(bsg_items=bsg_items)
+            await self.load_data(bsg_items=bsg_items)
