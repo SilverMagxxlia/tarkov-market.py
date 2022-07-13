@@ -7,6 +7,8 @@ class Item(Trader):
     bsgId: str
     name: str
     shortName: str
+    bannedOnFlea: bool
+    haveMarketData: bool
     price: int
     basePrice: int
     avg24hPrice: int
