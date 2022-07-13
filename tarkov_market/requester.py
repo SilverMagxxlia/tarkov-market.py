@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import aiohttp
 import asyncio
-import weakref
 
 from typing import (
     Any,
@@ -13,7 +12,6 @@ from typing import (
     Union,
     Dict,
     List,
-    Type,
     TypeVar,
     TYPE_CHECKING,
 )
@@ -61,58 +59,23 @@ class Route:
 
         self.url = url
 
-    @property
-    def bucket(self) -> str:
-        return f'{self.path}'
 
-
-class MaybeUnlock:
-
-    def __init__(self, lock: asyncio.Lock) -> None:
-        self.lock: asyncio.Lock = lock
-        self._unlock: bool = True
-
-    def __enter__(self: MU) -> MU:
-        return self
-
-    def defer(self) -> None:
-        self._unlock = False
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BE]],
-        exc: Optional[BE],
-        traceback
-    ) -> None:
-
-        if self._unlock:
-            self.lock.release()
-
-
-class HTTPClient:
+class HTTPRequester:
 
     def __init__(
         self,
         *,
         token: str,
+        session: aiohttp.ClientSession = aiohttp.ClientSession(),
         loop: Optional[asyncio.AbstractEventLoop] = None,
     ) -> None:
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
-        self._locks: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
+        self._loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+        self._session = session
         self.token: str = token
 
     async def request(self, route: Route, **kwargs: Any) -> Any:
-        bucket = route.bucket
         method = route.method
         url = route.url
-
-        lock = self._locks.get(bucket)
-
-        if lock is None:
-            lock = asyncio.Lock()
-
-            if bucket is not None:
-                self._locks[bucket] = lock
 
         headers: Dict[str, str] = {
             "x-api-key": self.token,
@@ -124,44 +87,24 @@ class HTTPClient:
 
         kwargs['headers'] = headers
 
-        await lock.acquire()
+        async with self._session.request(method, url, **kwargs) as response:
+            data = await json_or_text(response)
 
-        with MaybeUnlock(lock) as maybe_lock:
+            if isinstance(data, dict) and data.get('error') is not None:
+                reason = data['error']
 
-            for tries in range(5):
+                if reason == 'Access denied':
+                    raise LoginFailure(f'{self.token} is Invalid API KEY.')
 
-                try:
+                if reason in (
+                    'You reach your limit of 300 reqs per minute',
+                    'You reach your limit of 5 req per minute'
+                ):
+                    await asyncio.sleep(60)
+                    return await self.request(route, **kwargs)
 
-                    async with aiohttp.ClientSession() as session, session.request(method, url, **kwargs) as response:
-                        data = await json_or_text(response)
-
-                        if isinstance(data, dict) and data.get('error') is not None:
-                            reason = data['error']
-
-                            if reason == 'Access denied':
-                                raise LoginFailure(f'{self.token} is Invalid API KEY.')
-
-                            if reason in (
-                                'You reach your limit of 300 reqs per minute',
-                                'You reach your limit of 5 req per minute'
-                            ):
-                                maybe_lock.defer()
-                                self.loop.call_later(60, lock.release)
-
-                        if 300 > response.status >= 200:
-                            return data
-
-                        if response.status in {500, 502, 504}:
-                            await asyncio.sleep(1 + tries * 2)
-                            continue
-
-                except OSError as e:
-
-                    if tries < 4 and e.errno in (54, 10054):
-                        await asyncio.sleep(1 + tries * 2)
-                        continue
-
-                    raise
+            if 300 > response.status >= 200:
+                return data
 
     def get_item_by_name(
         self,
