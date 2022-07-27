@@ -8,6 +8,7 @@ Tarkov-Market.py
     :alt: GitHub release (latest by date including pre-releases)
     :target: https://github.com/Hostagen/tarkov-market.py/releases
 .. image:: https://img.shields.io/badge/Tarkov--Market-Provides%20API-9a8866?style=for-the-badge&logo=appveyor&logoColor=ffffff
+    :alt: tarkov-market.com
     :target: https://tarkov-market.com/
 
 async wrapper for [Tarkov Market](https://tarkov-market.com/) API written in Python.
