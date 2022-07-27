@@ -106,6 +106,9 @@ class HTTPRequester:
             if 300 > response.status >= 200:
                 return data
 
+    async def close(self) -> None:
+        await self._session.close()
+
     def get_item_by_name(
         self,
         name: str,
