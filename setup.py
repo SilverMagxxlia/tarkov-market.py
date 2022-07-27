@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 version = ''
-with open('tvc/__init__.py') as f:
+with open('tarkov_market/__init__.py') as f:
     search = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE)
 
     if search is not None:
