@@ -23,8 +23,11 @@ Installing
     # Windows
     py -3 -m pip install -U tarkov-market.py
 
-Quick Example
--------------
+Quick Examples
+---------------
+
+Basic use with use client
+'''''''''''''''''''''''''''
 
 .. code:: py
 
@@ -32,56 +35,78 @@ Quick Example
     import tarkov_market
 
     from typing import List
+    from tarkov_market import Item
 
-    loop = asyncio.get_event_loop()
-    market = tarkov_market.Client(token='INSERT YOUR API KEY.', refresh_rate=None)
+    TOKEN: str = 'YOUR API KEY'
+    market = tarkov_market.Client(token=TOKEN, refresh_rate=None)
 
 
     async def main() -> None:
-        # Find Item and return Items from preloaded Item List. It's Unlimited.
-        items: List[tarkov_market.Item] = market.find_items('keycard')
+        # return only one of the search results
+        item: Item = await market.fetch_item('TerraGroup Labs keycard (Red)')
 
-        # Get Item by name. Can get it through uid and bsg_id.
-        item: tarkov_market.Item
-        item = market.get_item('Tactical glasses')
-        item = market.get_item(bsg_id='BSG_ID')
-        item = market.get_item(uid='UID')
+        print(item.name, item.price)
 
-        print('Item Name: {}'.format(item.name))
-        print('Short Name: {}'.format(item.short_name))
-        print('Price {}'.format(item.price))
+        # return all search results
+        items: List[Item] = await market.fetch_items('key')
+
+        for item in items:
+            print(item.name, item.price)
+
+        '''
+        The fetch functions has a limit of 300 requests per minute because it communicates directly with the API.
+        If you have a large number of requests, check the example in the link below.
+
+        cache example: https://github.com/Hostagen/tarkov-market.py/blob/master/examples/cache.py
+
+        Unrestricted by pre-loading and caching data once.
+        '''
+
 
     if __name__ == '__main__':
-        market.start()
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(main())
-        loop.close()
+        loop.run_forever()
 
-Fetch Example
-''''''''''''''
+Simple to use without client declaration
+''''''''''''''''''''''''''''''''''''''''''
 
 .. code:: py
 
     import asyncio
-    import tarkov_market
 
     from typing import List
+    from tarkov_market import Client as TVMClient, Item
 
-    loop = asyncio.get_event_loop()
-    market = tarkov_market.Client(token='INSERT YOUR API KEY.', loop=loop)
+    TOKEN: str = 'YOUR API KEY'
 
 
     async def main():
-        # fetch the latest data from tarkov-market.
-        # there is a limit of 300 requests per minute to fetch.
+        async with TVMClient(token=TOKEN) as api:
+            item: Item = await api.fetch_item('TerraGroup Labs keycard (Red)')
+            print(item.name, item.price)
 
-        # return the first data item from the request result.
-        item: tarkov_market.Item = await market.fetch_item('TerraGroup Labs keycard (Red)')
+            items: List[Item] = await api.fetch_items('key')
 
-        # return the items from the request results.
-        items: List[tarkov_market.Item] = await market.fetch_items('keycard')
+            for item in items:
+                print(item.name, item.price)
 
-        return item
+        # When you exit the `async with` syntax, aiohttp.ClientSession is automatically and securely terminated.
+        # When you use the `async with` with again, a new aiohttp.ClientSession is created again.
+
+        async with TVMClient(token=TOKEN) as api:
+            ...
+
 
     if __name__ == '__main__':
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(main())
         loop.close()
+
+More Examples
+--------------
+https://github.com/Hostagen/tarkov-market.py/tree/master/examples
+
+Update Logs
+-------------
+`Check here for releases <https://github.com/Hostagen/tarkov-market.py/releases>`_
