@@ -1,19 +1,15 @@
-.. image:: https://user-images.githubusercontent.com/68284806/130361774-5fe5866f-d61b-40a3-afc1-2978ad530f17.png
-    :align: center
-    :height: 128
-    :target: https://github.com/Hostagen/tarkov-market.py
+Tarkov-Market.py
+=========================
+
+.. image:: https://img.shields.io/pypi/v/tarkov-market.py?color=ffd242&logo=pypi&logoColor=ffffff&style=for-the-badge
     :alt: PyPI
+    :target: https://pypi.org/project/tarkov-market.py/
+.. image:: https://img.shields.io/github/v/release/hostagen/tarkov-market.py?color=007ec6&include_prereleases&logo=github&style=for-the-badge
+    :alt: GitHub release (latest by date including pre-releases)
+.. image:: https://img.shields.io/badge/Tarkov--Market-Provides%20API-9a8866?style=for-the-badge&logo=appveyor&logoColor=ffffff
+    :target: https://tarkov-market.com/
 
 async API wrapper for Tarkov Market written in Python. It is designed to reverse `discord.py <https://github.com/Rapptz/discord.py>`_ as a base.
-
-.. class:: center
-
-    `PyPI <https://pypi.org/project/tarkov-market.py/>`_
-
-What is Tarkov-Market.py?
--------------------------
-
-- Tarkov-Market.py is Modern Python API using `async` and `await`.
 
 Installing
 ----------
@@ -61,7 +57,7 @@ Quick Example
         loop.close()
 
 Fetch Example
-~~~~~~~~~~~~~
+''''''''''''''
 
 .. code:: py
 
