@@ -1,12 +1,24 @@
-from setuptools import setup
 import re
 
-with open('requirements.txt') as f:
+from setuptools import setup
+
+requirements = []
+
+with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 version = ''
-with open('tarkov_market/__init__.py') as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+with open('tvc/__init__.py') as f:
+    search = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE)
+
+    if search is not None:
+        version = search.group(1)
+
+    else:
+        raise RuntimeError("Could not grab version string")
+
+if not version:
+    raise RuntimeError("version is not set")
 
 readme = ''
 
