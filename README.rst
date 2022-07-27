@@ -10,7 +10,7 @@ Tarkov-Market.py
 .. image:: https://img.shields.io/badge/Tarkov--Market-Provides%20API-9a8866?style=for-the-badge&logo=appveyor&logoColor=ffffff
     :target: https://tarkov-market.com/
 
-async API wrapper for Tarkov Market written in Python. It is designed to reverse `discord.py <https://github.com/Rapptz/discord.py>`_ as a base.
+async API wrapper for Tarkov Market written in Python.
 
 Installing
 ----------
