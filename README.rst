@@ -6,6 +6,7 @@ Tarkov-Market.py
     :target: https://pypi.org/project/tarkov-market.py/
 .. image:: https://img.shields.io/github/v/release/hostagen/tarkov-market.py?color=007ec6&include_prereleases&logo=github&style=for-the-badge
     :alt: GitHub release (latest by date including pre-releases)
+    :target: https://github.com/Hostagen/tarkov-market.py/releases
 .. image:: https://img.shields.io/badge/Tarkov--Market-Provides%20API-9a8866?style=for-the-badge&logo=appveyor&logoColor=ffffff
     :target: https://tarkov-market.com/
 
