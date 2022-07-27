@@ -3,7 +3,7 @@ from __future__ import annotations
 import io
 
 from os import PathLike
-from asyncio import sleep, get_event_loop, Event, AbstractEventLoop
+from asyncio import sleep, get_event_loop, AbstractEventLoop
 from typing import Dict, Optional, List, Callable, Union
 from logging import Logger, StreamHandler, basicConfig, getLogger, WARNING
 
@@ -42,20 +42,11 @@ class Client:
         if refresh_rate:
             self.loop.create_task(self.__refresh_event(refresh_rate, refresh_bsg_items))
 
-        self._ready: Event = Event()
-        self._closed: bool = False
         self._clear()
 
     def _clear(self) -> None:
         self._items: Dict[str, Item] = {}
         self._bsg_items: Dict[str, BSGItem] = {}
-        self._ready.clear()
-
-    def _handle_ready(self) -> None:
-        self._ready.set()
-
-    def is_ready(self) -> bool:
-        return self._ready.is_set()
 
     def get_item(
         self,
@@ -156,27 +147,8 @@ class Client:
         with open(fp, 'wb') as f:
             return f.write(data)
 
-    async def wait_until_ready(self) -> None:
-        await self._ready.wait()
-
     def start(self, *, load_bsg_items: bool = False) -> None:
-        self.loop.run_until_complete(self.ready(bsg_items=load_bsg_items))
-
-    async def ready(self, *, bsg_items: bool = True) -> None:
-
-        ready: bool = False
-        await self.load_data(bsg_items=bsg_items)
-
-        try:
-            ready = True
-
-        except Exception as error:
-            log.critical(f'Fail to ready client: {error}')
-
-        finally:
-
-            if ready is True:
-                log.debug('Client is now ready.')
+        self.loop.run_until_complete(self.load_data(bsg_items=load_bsg_items))
 
     async def load_data(self, *, bsg_items: bool = True) -> None:
         data = await self.__requester.get_all_items()
@@ -205,6 +177,12 @@ class Client:
             raise NotFound('Item is not Founded by tag.')
 
         return [Item(payload=payload) for payload in data]
+
+    async def __aenter__(self) -> Client:
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        await self.__requester.close()
 
     @property
     def items(self) -> List[Item]:
