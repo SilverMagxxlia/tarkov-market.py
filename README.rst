@@ -11,7 +11,7 @@ Tarkov-Market.py
     :alt: tarkov-market.com
     :target: https://tarkov-market.com/
 
-async wrapper for [Tarkov Market](https://tarkov-market.com/) API written in Python.
+async wrapper for `Tarkov Market <https://tarkov-market.com/>`_ API written in Python.
 
 Installing
 ----------
