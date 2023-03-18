@@ -153,6 +153,9 @@ class Client:
     async def load_data(self, *, bsg_items: bool = True) -> None:
         data = await self.__requester.get_all_items()
 
+        if not data:
+            return
+
         self._clear()
 
         for payload in data:

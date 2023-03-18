@@ -46,7 +46,7 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
 
 
 class Route:
-    BASE: ClassVar[str] = 'https://tarkov-market.com/api/v1'
+    BASE: ClassVar[str] = 'https://api.tarkov-market.app/api/v1'
 
     def __init__(self, method: str, path: str, **parameters: Any):
         self.path: str = path
