@@ -93,10 +93,7 @@ class Client:
 
         return result
 
-    def get_bsg_item(self, item_id: str) -> BSGItem:
-        return self._bsg_items.get(item_id)
-
-    async def fetch_item(self, item_name: str, lang: Optional[str] = None) -> Item:
+    async def fetch_item(self, item_name: str, lang: Optional[str] = MISSING) -> Item:
         """
         Raises
         --------
@@ -109,7 +106,10 @@ class Client:
             The Item you requested.
         """
 
-        data = await self.__requester.get_item_by_name(item_name, lang=lang)
+        data = await self.__requester.get_item(item_name, lang=lang)
+
+        if not data:
+            raise NotFound(f'Item with name {item_name} not found.')
 
         return Item(payload=data[0])
 
@@ -123,7 +123,20 @@ class Client:
             The items you requested.
         """
 
-        data = await self.__requester.get_item_by_name(item_name, lang=lang)
+        data = await self.__requester.get_item(item_name, lang=lang)
+
+        if not data:
+            raise NotFound(f'Item with name {item_name} not found.')
+
+        return [Item(payload=d) for d in data]
+
+    async def fetch_all_items(
+        self,
+        sort: str = MISSING,
+        sort_direction: str = MISSING,
+        tags: List[str] = MISSING,
+    ) -> List[Item]:
+        data = await self.__requester.get_all_items(sort=sort, sort_direction=sort_direction, tags=tags)
 
         return [Item(payload=d) for d in data]
 
@@ -147,6 +160,13 @@ class Client:
         with open(fp, 'wb') as f:
             return f.write(data)
 
+    def get_bsg_item(self, item_id: str) -> BSGItem:
+        return self._bsg_items.get(item_id)
+
+    async def fetch_bsg_all_items(self) -> List[BSGItem]:
+        data = await self.__requester.get_bsg_all_items()
+        return [BSGItem(payload=d) for d in data]
+
     def start(self, *, load_bsg_items: bool = False) -> None:
         self.loop.run_until_complete(self.load_data(bsg_items=load_bsg_items))
 
@@ -163,23 +183,11 @@ class Client:
             self._items[item.name] = item
 
         if bsg_items is True:
-            data = await self.__requester.get_all_bsg_items()
+            data = await self.__requester.get_bsg_all_items()
 
-            for payload in data.values():
+            for payload in data:
                 item = BSGItem(payload=payload)
                 self._bsg_items[item.id] = item
-
-    async def fetch_all_items_by_tag(self, tag: str = MISSING, tags: List[str] = MISSING) -> List[Item]:
-
-        if tags is not MISSING:
-            tag = ','.join(tags)
-
-        data = await self.__requester.get_all_item_by_tag(tag=tag)
-
-        if not data:
-            raise NotFound('Item is not Founded by tag.')
-
-        return [Item(payload=payload) for payload in data]
 
     async def __aenter__(self) -> Client:
         return self
@@ -193,7 +201,7 @@ class Client:
 
     async def __refresh_event(self, refresh_rate: float, bsg_items: bool) -> None:
 
-        if not refresh_rate > 0:
+        if refresh_rate <= 0:
             return
 
         while not self.loop.is_closed():

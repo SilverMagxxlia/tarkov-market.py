@@ -134,17 +134,17 @@ class HTTPRequester:
 
     def get_all_items(
         self,
-        sort: str = None,
+        sort: str = MISSING,
         sort_direction: str = MISSING,
         tags: List[str] = MISSING,
     ) -> Response[List[ItemPayload]]:
         url = '/items/all'
 
-        if sort:
-            url += f'?sort={sort}'
-
         if sort_direction is not MISSING:
             url += f'&sort_direction={sort_direction}'
+
+        if sort is not MISSING:
+            url += f'?sort={sort}'
 
         if tags is not MISSING:
             _tags = ','.join(tags)
@@ -153,7 +153,7 @@ class HTTPRequester:
         r = Route('GET', url)
         return self.request(r)
 
-    def get_all_bsg_items(self) -> Response[List[BSGItemPayload]]:
+    def get_bsg_all_items(self) -> Response[List[BSGItemPayload]]:
         r = Route('GET', '/bsg/items/all')
         return self.request(r)
 
