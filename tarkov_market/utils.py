@@ -14,7 +14,3 @@ class _MissingSentinel:
 
 
 MISSING: Any = _MissingSentinel()
-
-
-def _to_json(obj: Any) -> str:
-    return json.dumps(obj, separators=(',', ':'), ensure_ascii=True)

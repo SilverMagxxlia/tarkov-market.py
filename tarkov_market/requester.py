@@ -18,7 +18,7 @@ from typing import (
 
 from urllib.parse import quote as _uriquote
 
-from . import utils
+from .utils import MISSING
 from .errors import LoginFailure
 
 if TYPE_CHECKING:
@@ -83,7 +83,7 @@ class HTTPRequester:
 
         if 'json' in kwargs:
             headers['Content-Type'] = 'application/json'
-            kwargs['data'] = utils._to_json(kwargs.pop('json'))
+            kwargs['data'] = json.dumps(kwargs.pop('json'), separators=(',', ':'), ensure_ascii=True)
 
         kwargs['headers'] = headers
 
@@ -132,20 +132,25 @@ class HTTPRequester:
         r = Route('GET', '/item?uid={uid}', uid=uid)
         return self.request(r)
 
-    def get_all_items(self, sort: str = None, sort_direction: str = None) -> Response[List[ItemPayload]]:
+    def get_all_items(
+        self,
+        sort: str = None,
+        sort_direction: str = MISSING,
+        tags: List[str] = MISSING,
+    ) -> Response[List[ItemPayload]]:
         url = '/items/all'
 
         if sort:
             url += f'?sort={sort}'
 
-        if sort_direction:
+        if sort_direction is not MISSING:
             url += f'&sort_direction={sort_direction}'
 
-        r = Route('GET', url)
-        return self.request(r)
+        if tags is not MISSING:
+            _tags = ','.join(tags)
+            url += f'?tags={_tags}'
 
-    def get_all_item_by_tag(self, tag: str) -> Response[List[ItemPayload]]:
-        r = Route('GET', '/items/all?tag={tag}', tag=tag)
+        r = Route('GET', url)
         return self.request(r)
 
     def get_all_bsg_items(self) -> Response[List[BSGItemPayload]]:
