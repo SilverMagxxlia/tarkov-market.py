@@ -109,14 +109,14 @@ class HTTPRequester:
     async def close(self) -> None:
         await self._session.close()
 
-    def get_item_by_name(
+    def get_item(
         self,
         name: str,
         *,
-        lang: Optional[Union[LangType, str]] = None
+        lang: Union[LangType, str] = MISSING
     ) -> Response[List[ItemPayload]]:
 
-        if lang:
+        if lang is not MISSING:
             payload: Dict[str, str] = {
                 "q": name,
                 "lang": lang

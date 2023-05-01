@@ -18,3 +18,5 @@ class LangType(StrEnum):
     CZECH: str = 'cz'
     HUNGARIAN: str = 'hu'
     TURKISH: str = 'tu'
+    JAPANESE: str = 'jp'
+    KOREAN: str = 'kr'
