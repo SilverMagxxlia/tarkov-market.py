@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 import datetime
 
@@ -109,7 +109,7 @@ class Item:
         self.image_url = data['imgBig']
 
         self.is_functional: bool = data['isFunctional']
-        self.tags = data['tags']
+        self.tags: List[str] = data['tags']
 
         self.trader: Trader = Trader(data)
 
