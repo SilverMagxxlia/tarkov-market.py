@@ -78,7 +78,7 @@ class HTTPRequester:
         url = route.url
 
         headers: Dict[str, str] = {
-            "x-api-key": self.token,
+            'x-api-key': self.token,
         }
 
         if 'json' in kwargs:
@@ -121,11 +121,10 @@ class HTTPRequester:
                 "q": name,
                 "lang": lang
             }
-            r = Route('POST', '/item', json=payload)
+            r = Route('POST', '/item')
+            return self.request(r, json=payload)
 
-        else:
-            r = Route('GET', '/item?q={item_name}', item_name=name)
-
+        r = Route('GET', '/item?q={item_name}', item_name=name)
         return self.request(r)
 
     def get_item_by_uid(self, uid) -> Response[List[ItemPayload]]:
