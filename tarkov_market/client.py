@@ -106,14 +106,14 @@ class Client:
             The Item you requested.
         """
 
-        data = await self.__requester.get_item(item_name, lang=lang)
+        data = await self.__requester.get_items(item_name, lang=lang)
 
         if not data:
             raise NotFound(f'Item with name {item_name} not found.')
 
         return Item(payload=data[0])
 
-    async def fetch_items(self, item_name: str, lang: Optional[str] = None) -> List[Item]:
+    async def fetch_items(self, item_name: str, lang: Optional[str] = MISSING) -> List[Item]:
         """|coro|
         Gets a :class:`.Item`.
 
@@ -123,7 +123,7 @@ class Client:
             The items you requested.
         """
 
-        data = await self.__requester.get_item(item_name, lang=lang)
+        data = await self.__requester.get_items(item_name, lang=lang)
 
         if not data:
             raise NotFound(f'Item with name {item_name} not found.')

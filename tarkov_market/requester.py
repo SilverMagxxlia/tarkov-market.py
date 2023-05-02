@@ -109,7 +109,7 @@ class HTTPRequester:
     async def close(self) -> None:
         await self._session.close()
 
-    def get_item(
+    def get_items(
         self,
         name: str,
         *,
@@ -117,7 +117,7 @@ class HTTPRequester:
     ) -> Response[List[ItemPayload]]:
 
         if lang is not MISSING:
-            payload: Dict[str, str] = {
+            payload = {
                 "q": name,
                 "lang": lang
             }
